@@ -1,0 +1,21 @@
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/promo_engine</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="connection.password">123asd</property>
+        <property name="hibernate.connection.autocommit">true</property>
+        <property name="hibernate.connection.characterEncoding">utf8</property>
+        <property name="connection.pool_size">10</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <!--<property name="hibernate.show_sql">true</property>-->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</property>
+        <mapping class="com.vk.promoengine.entities.Campaign"/>
+        <mapping class="com.vk.promoengine.entities.PromoInfo"/>
+        <mapping class="com.vk.promoengine.entities.PromotedUser"/>
+        <mapping class="com.vk.promoengine.entities.PromoAction"/>
+        <mapping class="com.vk.promoengine.entities.Proxy"/>
+        <mapping class="com.vk.promoengine.entities.VkAccount"/>
+    </session-factory>
+</hibernate-configuration>
