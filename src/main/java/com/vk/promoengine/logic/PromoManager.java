@@ -49,13 +49,17 @@ public class PromoManager {
 
     public synchronized <R> R handleCampaign(long campaignId, CampaignHandler<R> handler) {
         Session session = sessionFactory.openSession();
+        log.debug(String.format("Session %d created for handling campaign %d", session.hashCode(), campaignId));
         Transaction transaction = session.beginTransaction();
         Campaign campaign = session.load(Campaign.class, campaignId);
-        R handleResult = handler.handle(campaign);
-        session.flush();
-        transaction.commit();
-        session.close();
-        return handleResult;
+        try {
+            return handler.handle(campaign);
+        } finally {
+            session.flush();
+            transaction.commit();
+            session.close();
+            log.debug(String.format("Session %d flushed and closed.", session.hashCode()));
+        }
     }
 
     public synchronized Campaign createCampaign(Campaign newCampaign) {

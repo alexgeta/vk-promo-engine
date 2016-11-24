@@ -16,7 +16,6 @@ import java.util.*;
 @Theme("tests-valo-reindeer")
 public class Edit extends AbstractUI {
 
-    private VerticalLayout rootLayout = new VerticalLayout();
     private PromoManager promoManager = PromoManager.getInstance();
     private TextArea accounts = new TextArea("Accounts");
     private TextArea welcomeMessages = new TextArea("Welcome messages");
@@ -24,23 +23,18 @@ public class Edit extends AbstractUI {
 
     @Override
     protected void init(VaadinRequest request) {
-        rootLayout.setSpacing(true);
-        rootLayout.setMargin(true);
-        String id = request.getParameter("id");
-        if (id != null) {
-            buildEditFields(Long.parseLong(id));
-        } else {
-            Label label = new Label("There are no campaign ID for displaying.");
-            label.setStyleName("h4");
-            rootLayout.addComponent(label);
+        try {
+            Component pageContent = buildContent(Long.parseLong(request.getParameter("id")));
+            setContent(pageContent);
+        } catch (Exception e) {
+            setLocation("/");
         }
-        rootLayout.addComponent(homeButton);
-        rootLayout.setComponentAlignment(homeButton, Alignment.BOTTOM_LEFT);
-        setContent(rootLayout);
-
     }
 
-    private void buildEditFields(final long id) {
+    private Component buildContent(final long id) {
+        VerticalLayout rootLayout = new VerticalLayout();
+        rootLayout.setSpacing(true);
+        rootLayout.setMargin(true);
         Campaign campaign = promoManager.getCampaign(id);
         PromoInfo promoInfo = campaign.getPromoInfo();
         accounts.setValue(accountsToString(campaign.getAccounts()));
@@ -68,6 +62,10 @@ public class Edit extends AbstractUI {
             setLocation("/details?id=" + String.valueOf(id));
         });
         rootLayout.addComponents(welcomeMessages, promoMessages, accounts, saveButton);
+        rootLayout.addComponent(homeButton);
+        rootLayout.setComponentAlignment(homeButton, Alignment.BOTTOM_LEFT);
+        setContent(rootLayout);
+        return rootLayout;
     }
 
     private void processAdd(Map<String, String> inputAccs, List<VkAccount> currentAccs) {

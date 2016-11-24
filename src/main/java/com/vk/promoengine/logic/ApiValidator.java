@@ -22,7 +22,7 @@ public class ApiValidator extends AbstractWebHelper {
     private static final Logger log = Logger.getLogger(ApiValidator.class);
     private final static String SUCCESS_TOKEN = "success=1";
     private final String antigateApiHost = "api.anti-captcha.com";
-    private final String antigateClientKey = "clientKeyGoesHere";
+    private final String antigateClientKey = "2e0442f05bdfb231d25c8289f1d3ad26";
 
     public ApiValidator(Proxy proxy) throws IOException {
         super(proxy);

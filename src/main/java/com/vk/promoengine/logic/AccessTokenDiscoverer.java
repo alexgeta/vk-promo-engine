@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.vk.promoengine.entities.Proxy;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
@@ -27,16 +28,11 @@ public class AccessTokenDiscoverer extends AbstractWebHelper {
         setInputValue(emailInput, login);
         setInputValue(passwordInput, pass);
         loginButton.click();
-        try {
-            WebElement code = webDriver.findElement(By.name("code"));
-            WebElement validateBtn = webDriver.findElement(By.className("button"));
-            code.click();
-            code.sendKeys(login.substring(1, login.length() - 2));
-            validateBtn.click();
-        } catch (Exception ignored) {
+        if (hasValidateCodeElement(webDriver)) {
+            submitValidateCode(login);
         }
         try {
-            loginButton = webDriver.findElement(By.id("install_allow"));
+            loginButton = webDriver.findElement(By.cssSelector("button.flat_button:nth-child(1)"));
             loginButton.click();
         } catch (Exception ignored) {
         }
@@ -49,6 +45,24 @@ public class AccessTokenDiscoverer extends AbstractWebHelper {
         }
         webDriver.quit();
         return result;
+    }
+
+    private void submitValidateCode(String login) {
+        WebElement code = webDriver.findElement(By.name("code"));
+        WebElement validateBtn = webDriver.findElement(By.className("button"));
+        code.click();
+        code.sendKeys(login.substring(1, login.length() - 2));
+        validateBtn.click();
+    }
+
+    private boolean hasValidateCodeElement(WebDriver webDriver) {
+        WebElement code;
+        try {
+            code = webDriver.findElement(By.name("code"));
+        } catch (Exception e) {
+            return false;
+        }
+        return code != null;
     }
 
     private void setInputValue(WebElement input, String value) {

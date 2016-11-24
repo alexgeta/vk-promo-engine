@@ -22,42 +22,31 @@ import java.util.*;
 @Theme("tests-valo-reindeer")
 public class Details extends AbstractUI {
 
-    private final String icon = "<span class=\"v-icon\" style=\"color:blue; font-family: FontAwesome;\">&#xf05a;</span>";
-    private VerticalLayout rootLayout = new VerticalLayout();
     private PromoManager promoManager = PromoManager.getInstance();
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private Map<String, Label> actionCountMap = new HashMap<>();
 
     @Override
     protected void init(VaadinRequest request) {
-        rootLayout.setSpacing(true);
-        rootLayout.setMargin(true);
-        rootLayout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
         String id = request.getParameter("id");
-        if (id != null) {
+        try {
             promoManager.handleCampaign(Long.parseLong(id), new CampaignHandler<Campaign>() {
                 @Override
                 public Campaign handle(Campaign campaign) {
-                    buildCampaignDetails(campaign);
+                    setContent(buildContent(campaign));
                     return null;
                 }
             });
-        } else {
-            Label label = new Label("There are no campaign ID for displaying.");
-            label.setStyleName("h4");
-            rootLayout.addComponent(label);
+        } catch (Exception e) {
+            setLocation("/");
         }
-        Button editButton = new Button("Edit", FontAwesome.EDIT);
-        editButton.addClickListener((Button.ClickListener) event -> setLocation("/edit?id=" + id));
-        HorizontalLayout backEditRow = new HorizontalLayout();
-        backEditRow.setSpacing(true);
-        backEditRow.addComponents(homeButton, editButton);
-        rootLayout.addComponents(backEditRow);
-        rootLayout.setComponentAlignment(backEditRow, Alignment.BOTTOM_LEFT);
-        setContent(rootLayout);
     }
 
-    private void buildCampaignDetails(Campaign campaign) {
+    private Component buildContent(Campaign campaign) {
+        VerticalLayout rootLayout = new VerticalLayout();
+        rootLayout.setSpacing(true);
+        rootLayout.setMargin(true);
+        rootLayout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
         Table welcomeMsgs = buildAndFillTable(null, "Message", campaign.getPromoInfo().getWelcomeMessages());
         Table promoMsgs = buildAndFillTable(null, "Message", campaign.getPromoInfo().getPromoMessages());
         Table accounts = buildAccountsTable(campaign);
@@ -98,6 +87,17 @@ public class Details extends AbstractUI {
         UI.getCurrent().getPage().setTitle(campaign.getName());
         rootLayout.addComponent(body);
         rootLayout.setComponentAlignment(body, Alignment.TOP_CENTER);
+        rootLayout.setSpacing(true);
+        rootLayout.setMargin(true);
+        rootLayout.setDefaultComponentAlignment(Alignment.TOP_CENTER);
+        Button editButton = new Button("Edit", FontAwesome.EDIT);
+        editButton.addClickListener((Button.ClickListener) event -> setLocation("/edit?id=" + campaign.getId()));
+        HorizontalLayout backEditRow = new HorizontalLayout();
+        backEditRow.setSpacing(true);
+        backEditRow.addComponents(homeButton, editButton);
+        rootLayout.addComponents(backEditRow);
+        rootLayout.setComponentAlignment(backEditRow, Alignment.BOTTOM_LEFT);
+        return rootLayout;
     }
 
     private Table buildProxiesTable(List<Proxy> proxies) {
@@ -297,7 +297,7 @@ public class Details extends AbstractUI {
 
     private Table buildActionStatTable() {
         Table table = new Table();
-        table.addContainerProperty("user_id", String.class, null);
+        table.addContainerProperty("user_id", Link.class, null);
         table.setColumnExpandRatio("user_id", 15);
         table.addContainerProperty("actions", String.class, null);
         table.setColumnExpandRatio("actions", 10);
@@ -320,9 +320,12 @@ public class Details extends AbstractUI {
         for (PromotedUser promotedUser : promotedUsers) {
             PromoAction lastAction = getLastTimePromoAction(promotedUser.getPerformedActions());
             if (day == null || day.equals(sdf.format(lastAction.getActionTime()))) {
+                String vkId = promotedUser.getVkId();
+                Link link = new Link(vkId, new ExternalResource("http://vk.com/id" + vkId));
+                link.setTargetName("_blank");
                 actionStats.addItem(
                         new Object[]{
-                                promotedUser.getVkId(),
+                                link,
                                 actionsToString(promotedUser.getPerformedActions()),
                                 promotedUser.getPromoterId(),
                                 lastAction.getActionTime().toString(),
